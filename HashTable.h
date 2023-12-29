@@ -29,63 +29,68 @@ class HashTable: public Dict<V> {
 
     public:
         void insert(std::string key, V value){
-		int i = h(key);
-		for(const auto& p : *(table[i])){
-			if(p.first == key){
-				throw std::runtime_error("La clave ya existe en el diccionario");
-			}
+		try{	
+			search(key);	
+
+		}catch(std::runtime_error& e){
+			table[h(key)].prepend(TableEntry<V>(key, value));
+			n++;
+	    		return;
+
 		}
-		table[i]->push_back(std::make_pair(key, value));
+		throw std::runtime_error("la clave '"+key+"' ya existe");
 	}
         V search(std::string key){
-		int i = h(key);
-		for(const auto& p : *(table[i])){
-                	if(p.first == key){
-                        	return p.second;
-                        }
-                }
-		 throw std::runtime_error("La clave no se encuentra en el diccionario");
+		for(int i = 0;  i<table[h(key)].size(); i++){
+			if(table[h(key)].get(i).key == key)
+			return table[h(key)].get(i).value;
+		}
+		throw std::runtime_error("La clave '"+key+"' no se ha encontado");
 	}
         V remove(std::string key){
-		int i = h(key);
-		auto& list = *(table[i]);
-		for(auto in = list.begin(); in != list.end(); ++in){
-			if(in->first == key){
-				list.erase(in);
-				return;
+		for(int i = 0;  i< table[h(key)].size() ;i++){
+			if(table[h(key)].get(i).key == key){				    
+				TableEntry<V> val=table[h(key)].remove(i);
+				n--;
+				return val.value;
 			}
 		}
-		throw std::runtime_error("La clave no se encuentra en el diccionario");
+		throw std::runtime_error("La clave '"+key+"' no se ha encontrado");
 	}
         int entries(){
 		return n;
 	}
-        HashTable(){
+        HashTable(int size){
 		n = 0;
-		for(int i = 0; i < max; i++){
-			table[i] = new std::list<std::pair<std::string, V>>;
-		}
+		max = size;
+		table = new ListLinked<TableEntry<V>>[size]();
+		
 	}
 	~HashTable(){
-		for(int i = 0; i < max; i++){
-			delete table[i];
-		}
+		delete[] table;
 	}
 	int capacity(){
 		return max;
 	}
 	friend std::ostream& operator<<(std::ostream &out, const HashTable<V> &th){
-		out << th.n << " " << th.key << "=>" << th.value;
+		out << "HashTable [entries: "<< th.n <<", capacity: " << th.max << "]"<< std::endl;
+		out << "==============" << std::endl << std::endl;
+		for(int i=0; i<th.max; i++){
+			out << " == Cubeta " << i <<" ==" <<std::endl << std::endl;
+			out << "List => [" <<std::endl << std::endl;
+			if(th.table[i].size() != 0){
+				out << std::endl;
+				for(int j = 0; j < th.table[i].size(); j++){
+					out << "  ('" << th.table[i].get(j).key << "' => " << th.table[i].get(j).value << ")"<< std::endl;
+				}
+			}
+			out << "]" << std::endl << std::endl;
+		}
+		out << "==============" << std::endl;
 		return out;
 	}
 	V operator[] (std::string key){
-	int i = h(key);
-	for(const auto& p : *(table[i])){
-		if(p.first == key && p. second != NULL){
-			return p.second;
-		}
-	} 
-	throw std::runtime_error("No existe valor asociado a esa clave");
+		return search(key);
 	}
 };
 
