@@ -11,8 +11,8 @@ class BSTree {
 	int nelem;
 	BSNode<T> *root;
 
-	BSNode<T>* search(BSNode<T>* n, T e) const{
-		if(n == NULL){
+	T search(BSNode<T>* n, T e) const{
+		if(n == nullptr){
 			throw std::runtime_error("elemento no encontrado");
 		}else if(n->elem < e){
 			return search(n->right, e);
@@ -28,15 +28,15 @@ class BSTree {
 		}else if(n->elem == e){
 			throw std::runtime_error("el elemento ya se encuentra en el arbol");
 		}else if(n->elem < e){
-			n->right = insert(n->der, e);
-		}else if(n.elem > e){
+			n->right = insert(n->right, e);
+		}else if(n->elem > e){
 			n->left = insert(n->left, e);
 		}
 		return n;
 	}
 
 	void print_inorder(std::ostream &out, BSNode<T>* n) const{
-		if(n != NULL){
+		if(n != nullptr){
 			print_inorder(out, n->left);
 			out << n->elem << " ";
 
@@ -106,8 +106,6 @@ class BSTree {
 	int size() const{
 		return nelem;
 	}
-	//Busqueda de elementos
-	
 	T search(T e) const{
 		return search(root, e); 
 	}
@@ -115,7 +113,7 @@ class BSTree {
 		return search(e);
 	}
 	void insert(T e){
-		return insert(root, e);
+		root = insert(root, e);
 		nelem ++;
 	}
 	friend std::ostream& operator<<(std::ostream &out, const BSTree<T> &bst){
@@ -123,7 +121,7 @@ class BSTree {
 		return out;
 	}
 	void remove(T e){
-		return remove(root, e);
+		root = remove(root, e);
 		nelem --;
 	}
 	~BSTree(){
